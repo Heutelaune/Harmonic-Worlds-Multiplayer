@@ -346,7 +346,10 @@
                     this.updateConnectionStatus('connecting', 'Verbinde mit Server...');
                     
                     // WebSocket.in Verbindung
-                    this.socket = new WebSocket('wss://websocket.in/your-room-name');
+                    const wsUrl = 'wss://websocket.in/harmonic-worlds'; // Ersetzen Sie dies mit Ihrer Room-URL
+                    console.log('Verbinde mit WebSocket:', wsUrl);
+                    
+                    this.socket = new WebSocket(wsUrl);
                     
                     this.socket.onopen = () => {
                         console.log('Mit Server verbunden');
@@ -366,23 +369,37 @@
                         resolve();
                     };
                     
-                    this.socket.onclose = () => {
-                        console.log('Vom Server getrennt');
-                        this.updateConnectionStatus('disconnected', 'Getrennt');
+                    this.socket.onclose = (event) => {
+                        console.log('Vom Server getrennt:', event.code, event.reason);
+                        this.updateConnectionStatus('disconnected', 'Getrennt: ' + (event.reason || 'Verbindung geschlossen'));
+                        
+                        // Versuche nach 5 Sekunden erneut zu verbinden
+                        setTimeout(() => {
+                            if (!this.isStarted) return;
+                            console.log('Versuche erneut zu verbinden...');
+                            this.connectToServer().catch(console.error);
+                        }, 5000);
                     };
                     
                     this.socket.onerror = (error) => {
                         console.error('WebSocket Fehler:', error);
+                        this.updateConnectionStatus('disconnected', 'Fehler bei der Verbindung');
                         reject(error);
                     };
                     
                     this.socket.onmessage = (event) => {
-                        const message = JSON.parse(event.data);
-                        this.handleServerMessage(message);
+                        try {
+                            const message = JSON.parse(event.data);
+                            this.handleServerMessage(message);
+                        } catch (error) {
+                            console.error('Fehler beim Verarbeiten der Nachricht:', error);
+                        }
                     };
                     
+                    // Timeout nach 10 Sekunden
                     setTimeout(() => {
                         if (this.socket.readyState !== WebSocket.OPEN) {
+                            this.socket.close();
                             reject(new Error('Verbindungs-Timeout'));
                         }
                     }, 10000);
