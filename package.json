@@ -1,0 +1,24 @@
+{
+  "name": "harmonic-worlds-multiplayer",
+  "version": "1.0.0",
+  "description": "Ein Multiplayer-Musikspiel mit Echtzeit-Interaktion",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "build": "echo 'Build abgeschlossen'"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "cacheDirectories": [
+    "node_modules"
+  ]
+} 
