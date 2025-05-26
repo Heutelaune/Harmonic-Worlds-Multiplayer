@@ -14,86 +14,80 @@ const PORT = process.env.PORT || 3000;
 // Statische Dateien aus dem public Verzeichnis
 app.use(express.static('public'));
 
-// Spieler-Verwaltung
-const players = new Map();
+// Web-Rooms Funktionalität
+const rooms = new Map();
 
 io.on('connection', (socket) => {
-    console.log('Neuer Spieler verbunden:', socket.id);
-    
-    // Spieler hinzufügen
-    players.set(socket.id, {
-        id: socket.id,
-        position: { x: 0, z: 0 },
-        color: Math.floor(Math.random() * 0xFFFFFF)
-    });
-    
-    // Bestehende Spieler an neuen Spieler senden
-    socket.emit('playerJoined', {
-        type: 'playerJoined',
-        players: Array.from(players.values())
-    });
-    
-    // Neuen Spieler an alle anderen senden
-    socket.broadcast.emit('playerJoined', {
-        type: 'playerJoined',
-        playerId: socket.id,
-        players: [players.get(socket.id)]
-    });
-    
-    // Bewegung
-    socket.on('move', (data) => {
-        const player = players.get(socket.id);
-        if (player) {
-            player.position = data.position;
-            socket.broadcast.emit('playerMoved', {
-                type: 'playerMoved',
-                playerId: socket.id,
-                position: data.position
-            });
+    console.log('Neuer Client verbunden:', socket.id);
+
+    // Web-Rooms Events
+    socket.on('*enter-room*', (roomName) => {
+        if (!rooms.has(roomName)) {
+            rooms.set(roomName, new Set());
         }
+        rooms.get(roomName).add(socket.id);
+        socket.join(roomName);
+        io.to(roomName).emit('*client-joined*', socket.id);
     });
-    
-    // Chat
-    socket.on('chatMessage', (data) => {
-        io.emit('chatMessage', {
-            type: 'chatMessage',
-            playerId: socket.id,
-            message: data.message
+
+    socket.on('*exit-room*', (roomName) => {
+        if (rooms.has(roomName)) {
+            rooms.get(roomName).delete(socket.id);
+            if (rooms.get(roomName).size === 0) {
+                rooms.delete(roomName);
+            }
+        }
+        socket.leave(roomName);
+        io.to(roomName).emit('*client-left*', socket.id);
+    });
+
+    socket.on('*broadcast-message*', (data) => {
+        const { roomName, message } = data;
+        io.to(roomName).emit('*message*', {
+            sender: socket.id,
+            message: message
         });
     });
-    
-    // Ping
-    socket.on('ping', (data) => {
-        socket.emit('pong', {
-            type: 'pong',
-            timestamp: data.timestamp
+
+    // Spiel-spezifische Events
+    socket.on('move', (data) => {
+        socket.broadcast.emit('playerMoved', {
+            id: socket.id,
+            position: data.position
         });
     });
-    
-    // Zonen
+
     socket.on('zoneEnter', (data) => {
-        socket.broadcast.emit('zoneEntered', {
-            type: 'zoneEntered',
-            playerId: socket.id,
+        socket.broadcast.emit('playerEnteredZone', {
+            id: socket.id,
             zoneIndex: data.zoneIndex
         });
     });
-    
+
     socket.on('zoneExit', (data) => {
-        socket.broadcast.emit('zoneExited', {
-            type: 'zoneExited',
-            playerId: socket.id,
+        socket.broadcast.emit('playerExitedZone', {
+            id: socket.id,
             zoneIndex: data.zoneIndex
         });
     });
-    
-    // Trennung
+
+    socket.on('chat', (message) => {
+        io.emit('chatMessage', {
+            id: socket.id,
+            message: message
+        });
+    });
+
     socket.on('disconnect', () => {
-        console.log('Spieler getrennt:', socket.id);
-        players.delete(socket.id);
-        io.emit('playerLeft', {
-            type: 'playerLeft',
-            playerId: socket.id
+        console.log('Client getrennt:', socket.id);
+        rooms.forEach((clients, roomName) => {
+            if (clients.has(socket.id)) {
+                clients.delete(socket.id);
+                io.to(roomName).emit('*client-left*', socket.id);
+                if (clients.size === 0) {
+                    rooms.delete(roomName);
+                }
+            }
         });
     });
 });

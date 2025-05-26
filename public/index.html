@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Harmonic Worlds - Multiplayer</title>
+    <script src="/socket.io/socket.io.js"></script>
     <style>
         * {
             margin: 0;
@@ -270,7 +271,6 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
 
     <script>
         class HarmonicWorldsMultiplayer {
@@ -1051,6 +1051,111 @@
         
         console.log('Initialisiere Harmonic Worlds Multiplayer...');
         const game = new HarmonicWorldsMultiplayer();
+    </script>
+    <script src="js/network.js"></script>
+    <script>
+        // Netzwerk-Manager initialisieren
+        const networkManager = new NetworkManager();
+        
+        // Event-Handler für Netzwerk-Events
+        networkManager.onPlayerJoined = (playerId) => {
+            const playersList = document.getElementById('playersList');
+            const playerItem = document.createElement('div');
+            playerItem.className = 'player-item';
+            playerItem.id = `player-${playerId}`;
+            playerItem.innerHTML = `
+                <div class="player-color" style="background-color: #${Math.floor(Math.random() * 0xFFFFFF).toString(16).padStart(6, '0')}"></div>
+                <span>${playerId}</span>
+            `;
+            playersList.appendChild(playerItem);
+            
+            // Chat-Nachricht
+            addChatMessage('System', `Spieler ${playerId} ist beigetreten`);
+        };
+        
+        networkManager.onPlayerLeft = (playerId) => {
+            const playerItem = document.getElementById(`player-${playerId}`);
+            if (playerItem) {
+                playerItem.remove();
+            }
+            
+            // Chat-Nachricht
+            addChatMessage('System', `Spieler ${playerId} hat das Spiel verlassen`);
+        };
+        
+        networkManager.onPlayerMoved = (data) => {
+            // Hier können Sie die Spieler-Bewegung aktualisieren
+            console.log('Spieler bewegt:', data);
+        };
+        
+        networkManager.onChatMessage = (data) => {
+            addChatMessage(data.playerId, data.message);
+        };
+        
+        networkManager.onZoneEntered = (data) => {
+            // Hier können Sie die Zonen-Logik implementieren
+            console.log('Spieler in Zone:', data);
+        };
+        
+        networkManager.onZoneExited = (data) => {
+            // Hier können Sie die Zonen-Logik implementieren
+            console.log('Spieler verlässt Zone:', data);
+        };
+        
+        // Chat-Funktionalität
+        function addChatMessage(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'chat-message';
+            if (sender === 'System') {
+                messageElement.className += ' system';
+            }
+            messageElement.innerHTML = `
+                <span class="player-name">${sender}:</span>
+                <span class="message-text">${message}</span>
+            `;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Chat-Input Event-Handler
+        const chatInput = document.getElementById('chatInput');
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && chatInput.value.trim()) {
+                networkManager.sendChatMessage(chatInput.value.trim());
+                chatInput.value = '';
+            }
+        });
+        
+        // Start-Button Event-Handler
+        const startButton = document.getElementById('startButton');
+        startButton.addEventListener('click', () => {
+            startButton.classList.add('hidden');
+            networkManager.connect();
+        });
+        
+        // Verbindungsstatus aktualisieren
+        function updateConnectionStatus(connected) {
+            const statusIndicator = document.querySelector('.status-indicator');
+            const connectionText = document.getElementById('connectionText');
+            
+            if (connected) {
+                statusIndicator.className = 'status-indicator';
+                connectionText.textContent = 'Verbunden';
+            } else {
+                statusIndicator.className = 'status-indicator disconnected';
+                connectionText.textContent = 'Getrennt';
+            }
+        }
+        
+        // Verbindungsstatus-Event-Handler
+        networkManager.socket.on('connect', () => {
+            updateConnectionStatus(true);
+        });
+        
+        networkManager.socket.on('disconnect', () => {
+            updateConnectionStatus(false);
+        });
     </script>
 </body>
 </html> 

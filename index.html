@@ -1,10 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta http-equiv="refresh" content="0; url=public/index.html">
-    <title>Harmonic Worlds Multiplayer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harmonic Worlds - Multiplayer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <p>Wenn Sie nicht automatisch weitergeleitet werden, klicken Sie <a href="public/index.html">hier</a>.</p>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <button id="startButton">🎵 Join Harmonic Worlds 🎵</button>
+        
+        <div id="ui">
+            <div id="connectionStatus">
+                <div class="status-indicator"></div>
+                <span id="connectionText">Connecting...</span>
+            </div>
+            <div>Your ID: <span id="playerId">-</span></div>
+            <div>Position: <span id="playerPos">0, 0</span></div>
+            
+            <div id="playersList">
+                <div style="font-weight: bold; margin-bottom: 5px;">Players Online:</div>
+            </div>
+        </div>
+        
+        <div id="chatContainer">
+            <div id="chatMessages"></div>
+            <input type="text" id="chatInput" placeholder="Type a message and press Enter...">
+        </div>
+        
+        <div id="debugInfo">
+            <div>Keys: <span id="activeKeys">-</span></div>
+            <div>Audio: <span id="audioStatus">Not Started</span></div>
+            <div>Zone: <span id="currentZone">None</span></div>
+        </div>
+        
+        <div id="networkStats">
+            <div>Ping: <span id="pingDisplay">-</span>ms</div>
+            <div>Sent: <span id="messagesSent">0</span></div>
+            <div>Received: <span id="messagesReceived">0</span></div>
+            <div>Players: <span id="playerCount">0</span></div>
+        </div>
+        
+        <div class="zone-info" id="zoneInfo">
+            <h3 id="zoneName">Welcome to Harmonic Worlds</h3>
+            <p id="zoneDescription">Move around to discover musical zones!</p>
+        </div>
+        
+        <div id="instructions">
+            <h3>🎵 Harmonic Worlds - Multiplayer 🎵</h3>
+            <p><strong>WASD</strong> or <strong>Arrow Keys</strong> to move</p>
+            <p><strong>Enter</strong> to chat with other players</p>
+            <p>Walk into <strong>colored circles</strong> to create harmonies!</p>
+            <p><em>Multiple players in the same zone create beautiful chords!</em></p>
+        </div>
+    </div>
+
+    <script src="js/network.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html> 

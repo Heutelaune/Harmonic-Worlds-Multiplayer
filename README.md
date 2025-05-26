@@ -1,45 +1,48 @@
 # Harmonic Worlds Multiplayer
 
-Ein interaktives Multiplayer-Musikspiel, bei dem Spieler durch verschiedene Zonen navigieren und gemeinsam harmonische Klänge erzeugen können.
+Ein interaktives Multiplayer-Musikspiel, das auf der Web-Rooms Technologie basiert. Spieler können sich in einer 3D-Welt bewegen und durch ihre Position und Interaktion mit anderen Spielern harmonische Klänge erzeugen.
+
+## Features
+
+- 🎵 Echtzeit-Musikgenerierung
+- 🌍 3D-Spielwelt mit interaktiven Zonen
+- 👥 Multiplayer-Unterstützung
+- 💬 Chat-System
+- 🎨 Visuelle Effekte und Animationen
 
 ## Installation
 
-1. Stelle sicher, dass Node.js (v14 oder höher) installiert ist
-2. Klone das Repository
-3. Installiere die Abhängigkeiten:
+1. Repository klonen:
+```bash
+git clone https://github.com/yourusername/harmonic-worlds-multiplayer.git
+cd harmonic-worlds-multiplayer
+```
+
+2. Abhängigkeiten installieren:
 ```bash
 npm install
 ```
 
-## Entwicklung
-
-Starte den Entwicklungsserver mit:
-```bash
-npm run dev
-```
-
-Der Server wird auf Port 3000 gestartet. Öffne http://localhost:3000 im Browser.
-
-## Produktion
-
-Starte den Produktionsserver mit:
+3. Server starten:
 ```bash
 npm start
 ```
 
-## Features
+## Spielanleitung
 
-- Echtzeit-Multiplayer mit Socket.io
-- Interaktive Musikzonen
-- Chat-System
-- Spieler-Bewegung und Kollision
-- Harmonische Klangerzeugung basierend auf Spieler-Positionen
-- Latenzmessung und Netzwerk-Statistiken
+1. Öffne die Anwendung in deinem Browser
+2. Klicke auf "Join Harmonic Worlds"
+3. Bewege dich mit WASD oder den Pfeiltasten
+4. Betrete farbige Zonen, um Töne zu erzeugen
+5. Interagiere mit anderen Spielern für harmonische Klänge
 
 ## Technologien
 
-- Node.js
-- Express
-- Socket.io
-- Three.js
-- Web Audio API 
+- Three.js für 3D-Grafik
+- Socket.IO für Echtzeit-Kommunikation
+- Web Audio API für Soundgenerierung
+- Express.js für den Server
+
+## Lizenz
+
+MIT License 
